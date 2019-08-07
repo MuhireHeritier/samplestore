@@ -28,34 +28,34 @@ namespace SampleStore.Migrations
                 TableBatchOperation batchOperation = new TableBatchOperation();
 
                 // Create a sample entity and add it to the table.
-                SampleEntity product1 = new SampleEntity(partitionName, "1");
-                product1.Artist = "Bob Marley";
-                product1.Title = "Reggae";
-                product1.Price = 22.31;
+                SampleEntity sample1 = new SampleEntity(partitionName, "1");
+                sample1.Artist = "Bob Marley";
+                sample1.Title = "Reggae";
+                sample1.SampleMp3URL = null;
 
                 // Create another sample entity and add it to the table.
-                SampleEntity product2 = new SampleEntity(partitionName, "2");
-                product2.Artist = "Michael Jackson";
-                product2.Title = "Pop";
-                product2.Price = 9.91;
+                SampleEntity sample2 = new SampleEntity(partitionName, "2");
+                sample2.Artist = "Michael Jackson";
+                sample2.Title = "Pop";
+                sample2.SampleMp3URL = null;
 
                 // Create another sample entity and add it to the table.
-                SampleEntity product3 = new SampleEntity(partitionName, "3");
-                product3.Artist = "Eminem";
-                product3.Title = "HipHop";
-                product3.Price = 4.99;
+                SampleEntity sample3 = new SampleEntity(partitionName, "3");
+                sample3.Artist = "Eminem";
+                sample3.Title = "HipHop";
+                sample3.SampleMp3URL = null;
 
                 // Create another sample entity and add it to the table.
-                SampleEntity product4 = new SampleEntity(partitionName, "4");
-                product4.Artist = "Martins";
-                product4.Title = "AfroBeat";
-                product4.Price = 4.99;
+                SampleEntity sample4 = new SampleEntity(partitionName, "4");
+                sample4.Artist = "Martins";
+                sample4.Title = "AfroBeat";
+                sample4.SampleMp3URL = null;
 
                 // Add sample entities to the batch insert operation.
-                batchOperation.Insert(product1);
-                batchOperation.Insert(product2);
-                batchOperation.Insert(product3);
-                batchOperation.Insert(product4);
+                batchOperation.Insert(sample1);
+                batchOperation.Insert(sample2);
+                batchOperation.Insert(sample3);
+                batchOperation.Insert(sample4);
 
                 // Execute the batch operation.
                 table.ExecuteBatch(batchOperation);

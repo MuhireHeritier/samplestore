@@ -19,9 +19,9 @@ namespace SampleStore.Models
         public string Artist { get; set; }
 
         /// <summary>
-        /// Price of the product
+        /// SampleMp3URL of the product
         /// </summary>
-        public double Price { get; set; }
+        public string SampleMp3URL { get; set; }
 
         /// <summary>
         /// Title of the product

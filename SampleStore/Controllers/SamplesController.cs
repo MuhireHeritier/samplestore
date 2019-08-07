@@ -43,7 +43,7 @@ namespace SampleStore.Controllers
                                                {
                                                    SampleID = e.RowKey,
                                                    Artist = e.Artist,
-                                                   Price = e.Price,
+                                                   SampleMp3URL = e.SampleMp3URL,
                                                    Title = e.Title
                                                };
             return sampleList;
@@ -56,7 +56,7 @@ namespace SampleStore.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [ResponseType(typeof(Sample))]
-        public IHttpActionResult GetProduct(string id)
+        public IHttpActionResult GetSample(string id)
         {
             // Create a retrieve operation that takes a sample entity.
             TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
@@ -73,7 +73,7 @@ namespace SampleStore.Controllers
                 {
                     SampleID = sampleEntity.RowKey,
                     Artist = sampleEntity.Artist,
-                    Price = sampleEntity.Price,
+                    SampleMp3URL = sampleEntity.SampleMp3URL,
                     Title = sampleEntity.Title
                 };
                 return Ok(p);
@@ -88,14 +88,14 @@ namespace SampleStore.Controllers
         /// <returns></returns>
         //[SwaggerResponse(HttpStatusCode.Created)]
         [ResponseType(typeof(Sample))]
-        public IHttpActionResult PostProduct(Sample sample)
+        public IHttpActionResult PostSample(Sample sample)
         {
             SampleEntity sampleEntity = new SampleEntity()
             {
                 RowKey = getNewMaxRowKeyValue(),
                 PartitionKey = partitionName,
                 Artist = sample.Artist,
-                Price = sample.Price,
+                SampleMp3URL = sample.SampleMp3URL,
                 Title = sample.Title
             };
 
@@ -117,7 +117,7 @@ namespace SampleStore.Controllers
         /// <returns></returns>
         //[SwaggerResponse(HttpStatusCode.NoContent)]
         [ResponseType(typeof(void))]
-        public IHttpActionResult PutProduct(string id, Sample sample)
+        public IHttpActionResult PutSample(string id, Sample sample)
         {
             if (id != sample.SampleID)
             {
@@ -134,7 +134,7 @@ namespace SampleStore.Controllers
             SampleEntity updateEntity = (SampleEntity)retrievedResult.Result;
 
             updateEntity.Artist = sample.Artist;
-            updateEntity.Price = sample.Price;
+            updateEntity.SampleMp3URL = sample.SampleMp3URL;
             updateEntity.Title = sample.Title;
 
             // Create the TableOperation that inserts the sample entity.
@@ -155,7 +155,7 @@ namespace SampleStore.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [ResponseType(typeof(Sample))]
-        public IHttpActionResult DeleteProduct(string id)
+        public IHttpActionResult DeleteSample(string id)
         {
             // Create a retrieve operation that takes a sample entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);

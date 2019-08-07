@@ -7,13 +7,13 @@ namespace SampleStore.Models
     public class SampleEntity : TableEntity
     {
         public string Artist { get; set; }
-        public double Price { get; set; }
+        public string SampleMp3URL { get; set; }
         public string Title { get; set; }
 
-        public SampleEntity(string partitionKey, string productID)
+        public SampleEntity(string partitionKey, string sampleID)
         {
             PartitionKey = partitionKey;
-            RowKey = productID;
+            RowKey = sampleID;
         }
 
         public SampleEntity() { }
