@@ -133,6 +133,10 @@ namespace SampleStore.Controllers
             // Assign the result to a SampleEntity object.
             SampleEntity updateEntity = (SampleEntity)retrievedResult.Result;
 
+            // get rid of ANY OLD BLOBs
+            // deleteOldBlobs.updateEntity();
+
+            // Updating the OLD ENTITY
             updateEntity.Artist = sample.Artist;
             updateEntity.SampleMp3URL = sample.SampleMp3URL;
             updateEntity.Title = sample.Title;
@@ -162,14 +166,23 @@ namespace SampleStore.Controllers
 
             // Execute the retrieve operation.
             TableResult retrievedResult = table.Execute(retrieveOperation);
+            // check if the TARGET ENTITY EXIST 
             if (retrievedResult.Result == null) return NotFound();
             else
             {
+                // ASSIGN RETRIEVED RESULT to a SAMPLE ENTITY
                 SampleEntity deleteEntity = (SampleEntity)retrievedResult.Result;
+                
+                // DELETE OPERATION 
                 TableOperation deleteOperation = TableOperation.Delete(deleteEntity);
+
+                // DELETE OLD BLOBs ASSOCIATED TO THE TARGET ENTITY
+                // deleteOldBlobs(deleteEntity) cHECK HOW to create this METHOD
 
                 // Execute the operation.
                 table.Execute(deleteOperation);
+
+              
 
                 return Ok(retrievedResult.Result);
             }
