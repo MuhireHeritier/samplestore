@@ -1,4 +1,5 @@
 ﻿using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Table;
 using SampleStore.Models;
 //using Swashbuckle.Swagger.Annotations;
@@ -20,12 +21,21 @@ namespace SampleStore.Controllers
         private CloudTableClient tableClient;
         private CloudTable table;
 
+        private BlobStorageService blobStorageService = new BlobStorageService();
+        private CloudQueueService queueStorageService = new CloudQueueService();
+
         public SamplesController()
         {
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
             tableClient = storageAccount.CreateCloudTableClient();
             table = tableClient.GetTableReference("Samples");
         }
+
+        private CloudBlobContainer getMusicContainer()
+        {
+            return blobStorageService.getCloudBlobContainer();
+        }
+
 
         /// <summary>
         /// Get all samples
@@ -39,13 +49,20 @@ namespace SampleStore.Controllers
 
             // Basically create a list of Sample from the list of SampleEntity with a 1:1 object relationship, filtering data as needed
             IEnumerable<Sample> sampleList = from e in entityList
-                                               select new Sample()
-                                               {
-                                                   SampleID = e.RowKey,
-                                                   Artist = e.Artist,
-                                                   SampleMp3URL = e.SampleMp3URL,
-                                                   Title = e.Title
-                                               };
+                                             select new Sample()
+                                             {
+
+                                                 SampleID = e.RowKey,
+                                                 Title = e.Title,
+                                                 Artist = e.Artist,
+                                                 CreatedDate = e.CreatedDate,                                                 
+                                                 Mp3Blob = e.Mp3Blob,
+                                                 SampleMp3Blob = e.SampleBlobURL,
+                                                 SampleMp3URL = e.SampleMp3URL,
+                                                 SampleDate = e.SampleDate
+
+
+                                             };
             return sampleList;
         }
 
@@ -64,7 +81,7 @@ namespace SampleStore.Controllers
             // Execute the retrieve operation.
             TableResult getOperationResult = table.Execute(getOperation);
 
-            // Construct response including a new DTO as apprporiatte
+            // Construct response including a new DTO as appropriate
             if (getOperationResult.Result == null) return NotFound();
             else
             {
@@ -72,13 +89,20 @@ namespace SampleStore.Controllers
                 Sample p = new Sample()
                 {
                     SampleID = sampleEntity.RowKey,
+                    Title = sampleEntity.Title,
                     Artist = sampleEntity.Artist,
-                    SampleMp3URL = sampleEntity.SampleMp3URL,
-                    Title = sampleEntity.Title
+                    Mp3Blob = sampleEntity.Mp3Blob,
+                    SampleMp3Blob = sampleEntity.SampleMp3Blob,
+                    SampleDate = sampleEntity.SampleDate,
+                    SampleMp3URL = sampleEntity.SampleMp3URL
+
+                    
                 };
                 return Ok(p);
             }
         }
+
+
 
         // POST: api/Samples
         /// <summary>
@@ -94,9 +118,14 @@ namespace SampleStore.Controllers
             {
                 RowKey = getNewMaxRowKeyValue(),
                 PartitionKey = partitionName,
+                Title = sample.Title,
                 Artist = sample.Artist,
-                SampleMp3URL = sample.SampleMp3URL,
-                Title = sample.Title
+                CreatedDate = DateTime.Now,
+                Mp3Blob = null,
+                SampleMp3Blob = null,
+                SampleMp3URL = null,
+                SampleDate = null
+
             };
 
             // Create the TableOperation that inserts the sample entity.
@@ -134,16 +163,20 @@ namespace SampleStore.Controllers
             SampleEntity updateEntity = (SampleEntity)retrievedResult.Result;
 
             // get rid of ANY OLD BLOBs
-            // deleteOldBlobs.updateEntity();
+            deleteOldBlobs(updateEntity);
 
             // Updating the OLD ENTITY
-            updateEntity.Artist = sample.Artist;
-            updateEntity.SampleMp3URL = sample.SampleMp3URL;
             updateEntity.Title = sample.Title;
+            updateEntity.Artist = sample.Artist;
+            updateEntity.CreatedDate = sample.CreatedDate;
+            updateEntity.Mp3Blob = null;
+            updateEntity.SampleMp3Blob = null;            
+            updateEntity.SampleMp3URL = null;
+            updateEntity.SampleDate = null;
+
 
             // Create the TableOperation that inserts the sample entity.
             // Note semantics of InsertOrReplace() which are consistent with PUT
-            // See: https://stackoverflow.com/questions/14685907/difference-between-insert-or-merge-entity-and-insert-or-replace-entity
             var updateOperation = TableOperation.InsertOrReplace(updateEntity);
 
             // Execute the insert operation.
@@ -151,6 +184,34 @@ namespace SampleStore.Controllers
 
             return StatusCode(HttpStatusCode.NoContent);
         }
+
+
+        // DELETE OLD BLOBS
+        /// <summary>
+        /// DELETE OLD BLOB
+        /// </summary>
+        /// <param name="updateEntity"></param>
+        private void deleteOldBlobs(SampleEntity updateEntity)
+        {
+            if (updateEntity.Mp3Blob != null)
+            {
+                
+                var Mp3blob = getMusicContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
+                Mp3blob.DeleteIfExists();
+                updateEntity.Mp3Blob = null;
+                updateEntity.SampleMp3URL = null;
+                updateEntity.SampleDate = null;
+                updateEntity.SampleMp3Blob = null;
+
+                if (updateEntity.SampleMp3Blob != null)
+                {
+                    var SampleMp3Blob = getMusicContainer().GetBlockBlobReference(updateEntity.SampleMp3Blob);
+                    SampleMp3Blob.DeleteIfExists();
+                }
+
+            }
+        }
+
 
         // DELETE: api/Samples/5
         /// <summary>
@@ -177,7 +238,7 @@ namespace SampleStore.Controllers
                 TableOperation deleteOperation = TableOperation.Delete(deleteEntity);
 
                 // DELETE OLD BLOBs ASSOCIATED TO THE TARGET ENTITY
-                // deleteOldBlobs(deleteEntity) cHECK HOW to create this METHOD
+                deleteOldBlobs(deleteEntity);
 
                 // Execute the operation.
                 table.Execute(deleteOperation);
@@ -188,6 +249,8 @@ namespace SampleStore.Controllers
             }
         }
 
+
+        
         private String getNewMaxRowKeyValue()
         {
             TableQuery<SampleEntity> query = new TableQuery<SampleEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionName));
