@@ -30,9 +30,9 @@ namespace SampleStore.Controllers
         {
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
             tableClient = storageAccount.CreateCloudTableClient();
-            table = tableClient.GetTableReference("Samples");
+            table = tableClient.GetTableReference("Data");
         }
-        private CloudBlobContainer getMusicContainer()
+        private CloudBlobContainer getSampleContainer()
         {
             return blobService.getCloudBlobContainer();
         }

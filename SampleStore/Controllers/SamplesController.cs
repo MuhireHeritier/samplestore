@@ -31,7 +31,7 @@ namespace SampleStore.Controllers
             table = tableClient.GetTableReference("Samples");
         }
 
-        private CloudBlobContainer getMusicContainer()
+        private CloudBlobContainer getSampleContainer()
         {
             return blobStorageService.getCloudBlobContainer();
         }
@@ -196,7 +196,7 @@ namespace SampleStore.Controllers
             if (updateEntity.Mp3Blob != null)
             {
                 
-                var Mp3blob = getMusicContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
+                var Mp3blob = getSampleContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
                 Mp3blob.DeleteIfExists();
                 updateEntity.Mp3Blob = null;
                 updateEntity.SampleMp3URL = null;
@@ -205,7 +205,7 @@ namespace SampleStore.Controllers
 
                 if (updateEntity.SampleMp3Blob != null)
                 {
-                    var SampleMp3Blob = getMusicContainer().GetBlockBlobReference(updateEntity.SampleMp3Blob);
+                    var SampleMp3Blob = getSampleContainer().GetBlockBlobReference(updateEntity.SampleMp3Blob);
                     SampleMp3Blob.DeleteIfExists();
                 }
 
