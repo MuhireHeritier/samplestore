@@ -7,10 +7,10 @@ namespace SampleStore
 {
     public class CloudQueueService
     {
-        public CloudQueue getCloudQueue()
+        public static CloudQueue getCloudQueue()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse
-                 (ConfigurationManager.ConnectionStrings["AzureStorage"].ToString());
+                 (ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
 
             CloudQueueClient queueClient = storageAccount.CreateCloudQueueClient();
 

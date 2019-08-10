@@ -11,6 +11,8 @@ using SampleStore;
 using Microsoft.WindowsAzure.Storage.Blob;
 using NAudio.Wave;
 using NLayer.NAudioSupport;
+using Microsoft.WindowsAzure.Storage;
+using System.Configuration;
 
 namespace Sample_WebJob
 {
@@ -27,22 +29,36 @@ namespace Sample_WebJob
                                     [Table("Samples", "{PartitionKey}", "{RowKey}")] SampleEntity sampleInTable,
                                     [Table("Samples")] CloudTable tableBinding, TextWriter logger)
         {
-            // use log.WriteLine 
-            logger.WriteLine("GeneratedAudioSample started...");
-            logger.WriteLine("Input blob is " + sampleInQueue);
 
+
+            // use log.WriteLine 
+            //logger.WriteLine("GeneratedAudioSample started...");
+            //logger.WriteLine("Input blob is " + sampleInQueue);
+
+            CloudStorageAccount storageAccount;
+            CloudTableClient tableClient;
+            storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
+            tableClient = storageAccount.CreateCloudTableClient();
+            tableBinding = tableClient.GetTableReference("Samples");
+
+            // Create a retrieve operation that takes a sample entity
+            TableOperation getOperation = TableOperation.Retrieve<SampleEntity>("Samples_Partition_1", sampleInQueue.RowKey);
+
+            // Execute the retrieve operation
+            TableResult getOperationResult = tableBinding.Execute(getOperation);
+            sampleInTable = (SampleEntity)getOperationResult.Result;
 
             // GETTING THE BLOB STORAGE using the RowKey
             BlobStorageService blobService = new BlobStorageService();
-            CloudBlobContainer blobContainer = blobService.getCloudBlobContainer();
-            CloudBlockBlob inputBlob;
-            CloudBlockBlob outputBlob;
 
-            sampleInTable.SampleDate = DateTime.Now;
-            sampleInTable.SampleMp3Blob = Guid.NewGuid().ToString() + ".mp3";
+            // use log.WriteLine 
+            //logger.WriteLine("Mp3Blob " + sampleInTable.Mp3Blob);
+            //logger.WriteLine("GeneratedAudioSample started...");
+            var inputBlob = blobService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + sampleInTable.Mp3Blob);
 
-            inputBlob = blobContainer.GetBlockBlobReference(sampleInQueue.Mp3Blob);
-            outputBlob = blobContainer.GetBlockBlobReference(sampleInTable.SampleMp3Blob);
+            String sampleBlobName = String.Format("{0}{1}", Guid.NewGuid(), ".mp3");
+
+            var outputBlob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + sampleBlobName);
 
             // Open streams to blobs for reading and writing as appropriate.
             // Pass references to application specific methods
@@ -52,6 +68,19 @@ namespace Sample_WebJob
                 CreateSample(input, output, 20);
                 outputBlob.Properties.ContentType = "audio/mpeg3";
             }
+            // GETTING THE BLOB STORAGE using the RowKey
+            //BlobStorageService blobService = new BlobStorageService();
+            //CloudBlobContainer blobContainer = blobService.getCloudBlobContainer();
+            //CloudBlockBlob inputBlob;
+            //CloudBlockBlob outputBlob;
+
+            sampleInTable.SampleDate = DateTime.Now;
+            sampleInTable.SampleMp3Blob = Guid.NewGuid().ToString() + ".mp3";
+
+            //inputBlob = blobContainer.GetBlockBlobReference(sampleInQueue.Mp3Blob);
+            //outputBlob = blobContainer.GetBlockBlobReference(sampleInTable.SampleMp3Blob);
+
+            
 
             // Create the TableOperation that inserts the sample entity.
             var updateOperation = TableOperation.InsertOrReplace(sampleInTable);

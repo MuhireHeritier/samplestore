@@ -21,73 +21,116 @@ namespace SampleStore.Controllers
         private const String partitionName = "Samples_Partition_1";
         private CloudStorageAccount storageAccount;
         private BlobStorageService blobService = new BlobStorageService();
-        private SamplesController sampleController = new SamplesController();
+        //private SamplesController sampleController = new SamplesController();
         private CloudTableClient tableClient;
         private CloudTable table;
-        private CloudQueueService cloudQueue = new CloudQueueService();
+        //private CloudQueueService cloudQueue = new CloudQueueService();
 
         public DataController()
         {
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
             tableClient = storageAccount.CreateCloudTableClient();
-            table = tableClient.GetTableReference("Data");
+            table = tableClient.GetTableReference("Samples");
         }
-        private CloudBlobContainer getSampleContainer()
-        {
-            return blobService.getCloudBlobContainer();
-        }
-        private CloudQueue getThumbnailMakerQueue()
-        {
-            return cloudQueue.getCloudQueue();
-        }
+        //private CloudBlobContainer getSampleContainer()
+        //{
+        //    return blobService.getCloudBlobContainer();
+        //}
+        //private CloudQueue getThumbnailMakerQueue()
+        //{
+        //    return cloudQueue.getCloudQueue();
+        //}
 
         // GET: api/Data/5
-        public IHttpActionResult Get(string id)
+        public HttpResponseMessage Get(string id)
         {
-            // Create a retrieve operation that takes a sample entity.
+
+            //create a retrieve
             TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
 
-            // Execute the retrieve operation.
+            //execute retrieve
             TableResult getOperationResult = table.Execute(getOperation);
+            if (getOperationResult.Result == null) return Request.CreateErrorResponse(HttpStatusCode.NotFound, "no blob");
+            SampleEntity sample = (SampleEntity)getOperationResult.Result;
 
-            // Construct response
-            if (getOperationResult.Result == null) return NotFound();
-            else
+            HttpResponseMessage message;
+            try
             {
-                SampleEntity sampleEntity = (SampleEntity)getOperationResult.Result;
-                if (sampleEntity.Mp3Blob == null)
-                {
-                    return NotFound();
-                }
 
-                var blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + sampleEntity.Mp3Blob);
+                CloudBlobContainer blobContainer = blobService.getCloudBlobContainer();
+                CloudBlockBlob blob = blobContainer.GetBlockBlobReference(sample.SampleMp3Blob);
+
+                if (!blob.Exists()) return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "no blob at DataController(GET): " + sample.SampleBlobURL);
+
                 Stream blobStream = blob.OpenRead();
-                HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.OK);
+
+                message = new HttpResponseMessage(HttpStatusCode.OK);
                 message.Content = new StreamContent(blobStream);
                 message.Content.Headers.ContentLength = blob.Properties.Length;
-                message.Content.Headers.ContentType = new
-                System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg3");
-                message.Content.Headers.ContentDisposition = new
-                System.Net.Http.Headers.ContentDispositionHeaderValue("audio")
+                message.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg3");
+                message.Content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("attachment")
                 {
                     FileName = blob.Name,
                     Size = blob.Properties.Length
                 };
-                return Ok(message);
+
             }
+            catch (Exception e) { return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "likely no blob at DataController (GET):" + sample.SampleMp3Blob); }
+            return message;
+
         }
-        // PUT: api/Data/5
-        public IHttpActionResult Put(string id)
+
+
+
+    //public IHttpActionResult Get(string id)
+    //{
+    //    // Create a retrieve operation that takes a sample entity.
+    //    TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
+
+    //    // Execute the retrieve operation.
+    //    TableResult getOperationResult = table.Execute(getOperation);
+
+    //    // Construct response
+    //    if (getOperationResult.Result == null) return NotFound();
+    //    else
+    //    {
+    //        SampleEntity sampleEntity = (SampleEntity)getOperationResult.Result;
+    //        if (sampleEntity.Mp3Blob == null)
+    //        {
+    //            return NotFound();
+    //        }
+
+    //        var blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + sampleEntity.SampleMp3Blob);
+    //        Stream blobStream = blob.OpenRead();
+    //        HttpResponseMessage message = new HttpResponseMessage(HttpStatusCode.OK);
+    //        message.Content = new StreamContent(blobStream);
+    //        message.Content.Headers.ContentLength = blob.Properties.Length;
+    //        message.Content.Headers.ContentType = new
+    //        System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg3");
+    //        message.Content.Headers.ContentDisposition = new
+    //        System.Net.Http.Headers.ContentDispositionHeaderValue("attachment")
+    //        {
+    //            FileName = blob.Name,
+    //            Size = blob.Properties.Length
+    //        };
+    //        return ResponseMessage(message);
+    //    }
+    //}
+    // PUT: api/Data/5
+    public IHttpActionResult Put(string id)
         {
 
             // Create a retrieve operation that takes a sample entity.
             TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
 
             // Execute the retrieve operation.
+            tableClient = storageAccount.CreateCloudTableClient();
+            table = tableClient.GetTableReference("Samples");
             TableResult getOperationResult = table.Execute(getOperation);
 
-            // Construct response
+            // Construct response including A NEW DTO AS APPROPRIATE  
             if (getOperationResult.Result == null) return NotFound();
+            // else GET THE SAMPLE
             else
             {
                 // Assign the result to a SampleEntity object.
@@ -97,32 +140,42 @@ namespace SampleStore.Controllers
                 deleteOldBlobs(updateEntity);
 
                 //make the filename unique in the blob container
-                var fileName = updateEntity.Title;
+                //var fileName = updateEntity.Title;
 
-                //Create the path for the blob
-                String path = "audio/" + fileName + ".mp3";
+                //Create the path for the new blob
+                //String path = "audio/" + fileName + ".mp3";
+
+                // CREATE NAME FOR THE NEW SAMPLE
+                String mp3BlobName = string.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 
 
                 //Uploading the blob content from the Http stream
-                var blob = blobService.getCloudBlobContainer().GetBlockBlobReference(path);
+                //var blob = blobService.getCloudBlobContainer().GetBlockBlobReference(path);
                 var request = HttpContext.Current.Request;
-                blob.Properties.ContentType = "audio/mpeg3";
-                blob.UploadFromStream(request.InputStream);
+                var mp3Blob = blobService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + mp3BlobName);
+                mp3Blob.Properties.ContentType = "audio/mpeg3";
 
-                //update the relevant entity with the new blob name
-                updateEntity.Mp3Blob = blob.Name;
-
+                // save the uploaded blob
+                mp3Blob.UploadFromStream(request.InputStream);
                 var baseUrl = Request.RequestUri.GetLeftPart(UriPartial.Authority);
                 String sampleURL = baseUrl.ToString() + "/api/data/" + id;
+                
+                //update the relevant entity with the new blob name
+                updateEntity.Mp3Blob = mp3BlobName;              
 
                 //Also update the URL and SampleBlobURL and SampleSate
                 updateEntity.SampleMp3URL = sampleURL;
                 updateEntity.SampleMp3Blob = null;
                 updateEntity.SampleDate = null;
 
-                var sampleQueue = cloudQueue.getCloudQueue();
+                // Execute the insert operation
+                TableOperation updatesOperation = TableOperation.InsertOrReplace(updateEntity);
+                table.Execute(updatesOperation);
+
+                //Add message in the queue to pick UP THE NEW BLOB
+                //var sampleQueue = cloudQueue.getCloudQueue();
                 var queueMessageSample = new SampleEntity(partitionName, id);
-                sampleQueue.AddMessage(new CloudQueueMessage(JsonConvert.SerializeObject(queueMessageSample)));
+                CloudQueueService.getCloudQueue().AddMessage(new CloudQueueMessage(JsonConvert.SerializeObject(queueMessageSample)));
 
                 return StatusCode(HttpStatusCode.NoContent);
             }
@@ -131,29 +184,33 @@ namespace SampleStore.Controllers
         private IHttpActionResult deleteOldBlobs(SampleEntity updateEntity)
         {
 
-            TableOperation insertOperation = TableOperation.InsertOrReplace(updateEntity);
+            var updateOperation = TableOperation.InsertOrReplace(updateEntity);
+            //TableOperation insertOperation = TableOperation.InsertOrReplace(updateEntity);
 
-            if (updateEntity.Mp3Blob != null)
+            if (updateEntity.Mp3Blob != null || updateEntity.SampleMp3Blob != null || updateEntity.SampleDate != null)
             {
-                var blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
-                blob.DeleteIfExists();
-                blob = null;
-                updateEntity.SampleBlobURL = null;
+                //var blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
+                //blob.DeleteIfExists();
+                //blob = null;
+                updateEntity.Mp3Blob = null;
                 updateEntity.SampleMp3Blob = null;
                 updateEntity.SampleMp3URL = null;
-            }
-            if (updateEntity.SampleMp3Blob != null)
-            {
+                updateEntity.SampleDate = null;
+
+                // Execute the insert operation
+                table.Execute(updateOperation);
+
+                // GET BLOB REFERENCE AND DELETE
+                BlobStorageService blobService = new BlobStorageService();
+                var mp3Blob = blobService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + updateEntity.Mp3Blob);
                 var sampleMp3Blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
+
+                // DELETE ANY EXSITING BLOB
+                mp3Blob.DeleteIfExists();
                 sampleMp3Blob.DeleteIfExists();
-                sampleMp3Blob = null;
-                updateEntity.SampleBlobURL = null;
-                updateEntity.SampleMp3Blob = null;
-                updateEntity.SampleMp3URL = null;
             }
 
             return StatusCode(HttpStatusCode.NoContent);
-
         }
     }
 }

@@ -3,7 +3,6 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-
 namespace SampleStore.Models
 {
     public class Sample

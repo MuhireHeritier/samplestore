@@ -10,7 +10,7 @@ namespace SampleStore
         public CloudBlobContainer getCloudBlobContainer()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse
-                (ConfigurationManager.ConnectionStrings["AzureStorage"].ToString());
+                (ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
 
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
