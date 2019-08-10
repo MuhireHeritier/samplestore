@@ -18,10 +18,10 @@ namespace Sample_WebJob
     {
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
-        public static void ProcessQueueMessage([QueueTrigger("queue")] string message, TextWriter log)
-        {
-            log.WriteLine(message);
-        }
+        //public static void ProcessQueueMessage([QueueTrigger("queue")] string message, TextWriter log)
+        //{
+        //    log.WriteLine(message);
+        //}
 
         public static void GenerateAudioSample([QueueTrigger("audiosamplemaker")] SampleEntity sampleInQueue,
                                     [Table("Samples", "{PartitionKey}", "{RowKey}")] SampleEntity sampleInTable,
