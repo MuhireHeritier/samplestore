@@ -1,4 +1,3 @@
-C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\Microsoft.AI.Agent.Intercept.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\ApplicationInsights.config
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\roslyn\csc.exe
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
@@ -15,6 +14,7 @@ C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\b
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\SampleStore.dll.config
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\SampleStore.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\SampleStore.pdb
+C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\Microsoft.AI.Agent.Intercept.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\Microsoft.AI.DependencyCollector.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\Microsoft.AI.PerfCounterCollector.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\Microsoft.AI.ServerTelemetryChannel.dll
@@ -98,6 +98,5 @@ C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\b
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\ru\System.Spatial.resources.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\zh-Hans\System.Spatial.resources.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\zh-Hant\System.Spatial.resources.dll
-C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.csprojResolveAssemblyReference.cache
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.pdb

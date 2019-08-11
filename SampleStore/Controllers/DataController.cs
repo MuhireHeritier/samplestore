@@ -22,10 +22,8 @@ namespace SampleStore.Controllers
         private const String partitionName = "Samples_Partition_1";
         private CloudStorageAccount storageAccount;
         private BlobStorageService blobService = new BlobStorageService();
-        //private SamplesController sampleController = new SamplesController();
         private CloudTableClient tableClient;
         private CloudTable table;
-        //private CloudQueueService cloudQueue = new CloudQueueService();
 
         public DataController()
         {
@@ -33,17 +31,9 @@ namespace SampleStore.Controllers
             tableClient = storageAccount.CreateCloudTableClient();
             table = tableClient.GetTableReference("Samples");
         }
-        //private CloudBlobContainer getSampleContainer()
-        //{
-        //    return blobService.getCloudBlobContainer();
-        //}
-        //private CloudQueue getThumbnailMakerQueue()
-        //{
-        //    return cloudQueue.getCloudQueue();
-        //}
 
         // GET: api/Data/5
-        [ResponseType(typeof(IHttpActionResult))]
+        [ResponseType(typeof(string))]
         public IHttpActionResult Get(string id)
         {
             // Create a retrieve operation that takes a sample entity.
@@ -87,8 +77,6 @@ namespace SampleStore.Controllers
             TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
 
             // Execute the retrieve operation.
-            //tableClient = storageAccount.CreateCloudTableClient();
-            //table = tableClient.GetTableReference("Samples");
             TableResult getOperationResult = table.Execute(getOperation);
 
             // Assign the result to a SampleEntity object.
@@ -106,14 +94,11 @@ namespace SampleStore.Controllers
                 deleteOldBlobs(updateEntity);
             }
 
-            //make the filename unique in the blob container
-            //var fileName = updateEntity.Title;
-
-            // CREATE NAME FOR THE NEW SAMPLE
-            String mp3BlobName = string.Format("{0}{1}", Guid.NewGuid(), ".mp3");
+            // CREATE NAME FOR THE NEW SAMPLE. make the filename unique in the blob container
+            string mp3BlobName = string.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 
             //Create the path for the new blob
-            String path = "audio/" + mp3BlobName;
+            string path = "audio/" + mp3BlobName;
 
 
             //Uploading the blob content from the Http stream
@@ -130,7 +115,7 @@ namespace SampleStore.Controllers
             updateEntity.Mp3Blob = mp3BlobName;
 
             var baseUrl = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-            String sampleURL = baseUrl.ToString() + "/api/data/" + id;
+            string sampleURL = baseUrl.ToString() + "/api/data/" + id;
 
             //Also update the URL and SampleBlobURL and SampleSate
             updateEntity.SampleMp3URL = sampleURL;
@@ -147,63 +132,9 @@ namespace SampleStore.Controllers
             CloudQueueService.getCloudQueue().AddMessage(new CloudQueueMessage(JsonConvert.SerializeObject(updateEntity)));
 
             return Ok(sample);
-
-
-            // Construct response including A NEW DTO AS APPROPRIATE  
-            //if (getOperationResult.Result == null) return NotFound();
-            // else GET THE SAMPLE
-            //else
-           // {
-                // Assign the result to a SampleEntity object.
-                //SampleEntity updateEntity = (SampleEntity)getOperationResult.Result;
-
-                //Code to delete any existing blobs
-                //deleteOldBlobs(updateEntity);
-
-                ////make the filename unique in the blob container
-                //var fileName = updateEntity.Title;
-
-                //// CREATE NAME FOR THE NEW SAMPLE
-                //String mp3BlobName = string.Format("{0}{1}", Guid.NewGuid(), ".mp3");
-
-                ////Create the path for the new blob
-                //String path = "audio/" + mp3BlobName + ".mp3";  
-
-
-                ////Uploading the blob content from the Http stream
-                //var blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference(path);
-                //var request = HttpContext.Current.Request;
-                ////var mp3Blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + mp3BlobName);
-                //blob.Properties.ContentType = "audio/mpeg3";
-
-                //// save the uploaded blob
-                //blob.UploadFromStream(request.InputStream);
-                //blob.SetMetadata();
-
-                ////update the relevant entity with the new blob name
-                //updateEntity.Mp3Blob = mp3BlobName;
-
-                //var baseUrl = Request.RequestUri.GetLeftPart(UriPartial.Authority);
-                //String sampleURL = baseUrl.ToString() + "/api/data/" + id;
-                
-                ////Also update the URL and SampleBlobURL and SampleSate
-                //updateEntity.SampleMp3URL = sampleURL;
-                ////updateEntity.SampleMp3Blob = null;
-                //updateEntity.SampleDate = DateTime.Now;
-
-                //// Execute the insert operation
-                //TableOperation updatesOperation = TableOperation.InsertOrReplace(updateEntity);
-                //table.Execute(updatesOperation);
-
-                ////Add message in the queue to pick UP THE NEW BLOB
-                ////var sampleQueue = cloudQueue.getCloudQueue();
-                ////var queueMessageSample = new SampleEntity(partitionName, id);
-                //CloudQueueService.getCloudQueue().AddMessage(new CloudQueueMessage(JsonConvert.SerializeObject(updateEntity)));
-
-                //return StatusCode(HttpStatusCode.NoContent);
-            //}
         }
 
+        
         /// <summary>
         /// Delete any existing blob
         /// </summary>
