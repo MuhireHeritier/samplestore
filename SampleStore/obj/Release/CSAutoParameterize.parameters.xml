@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="AzureWebJobsDashboard-Web.config Connection String" description="AzureWebJobsDashboard Connection String used in web.config by the application to access the database." defaultValue="DefaultEndpointsProtocol=https;AccountName=samplestorestrg;AccountKey=dQHLf2i4y/wPSLtghHllvNWfybGv1VaNenTiRsa8KZEK+4kNuTH86y6LoAE84vuXI05YojHoU0KtacPGMCo3Dg==;EndpointSuffix=core.windows.net" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\hmuhire\\Documents\\Visual\ Studio\ 2015\\Projects\\SampleStore\\SampleStore\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='AzureWebJobsDashboard']/@connectionString" />
+  </parameter>
+  <parameter name="AzureWebJobsStorage-Web.config Connection String" description="AzureWebJobsStorage Connection String used in web.config by the application to access the database." defaultValue="DefaultEndpointsProtocol=https;AccountName=samplestorestrg;AccountKey=4KLi4pSIQQmFgi/cmQ4ZwXY2fjmtOXvhXlhl3DhrrjnBd5SjDUG8Nx2bTVUhbUi9USs8bLa0kb6V+v4H6B3A/A==;EndpointSuffix=core.windows.net" tags="SqlConnectionString">
+    <parameterEntry kind="XmlFile" scope="C:\\Users\\hmuhire\\Documents\\Visual\ Studio\ 2015\\Projects\\SampleStore\\SampleStore\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='AzureWebJobsStorage']/@connectionString" />
+  </parameter>
+</parameters>

@@ -184,6 +184,7 @@
     </Content>
     <Content Include="Service References\Application Insights\ConnectedService.json" />
     <Content Include="Properties\webjobs-list.json" />
+    <None Include="Properties\PublishProfiles\audiostore - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
