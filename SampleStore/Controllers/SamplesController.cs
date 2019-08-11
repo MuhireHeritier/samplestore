@@ -13,8 +13,11 @@ using System.Web.Http.Description;
 
 namespace SampleStore.Controllers
 {
+    // class SamplesController extends ApiController
     public class SamplesController : ApiController
     {
+        // Declaring the fields - partitionName, storageAccount, tableClient, and table
+        // Instantiating a new blobStorageService, queueStorageService
         private const String partitionName = "Samples_Partition_1";
 
         private CloudStorageAccount storageAccount;
@@ -24,6 +27,7 @@ namespace SampleStore.Controllers
         private BlobStorageService blobStorageService = new BlobStorageService();
         private CloudQueueService queueStorageService = new CloudQueueService();
 
+        // Constructor 
         public SamplesController()
         {
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
@@ -47,11 +51,10 @@ namespace SampleStore.Controllers
             TableQuery<SampleEntity> query = new TableQuery<SampleEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionName));
             List<SampleEntity> entityList = new List<SampleEntity>(table.ExecuteQuery(query));
 
-            // Basically create a list of Sample from the list of SampleEntity with a 1:1 object relationship, filtering data as needed
+            // Create a list of Sample from the list of SampleEntity with a 1:1 object relationship, filtering data as needed
             IEnumerable<Sample> sampleList = from e in entityList
                                              select new Sample()
                                              {
-
                                                  SampleID = e.RowKey,
                                                  Title = e.Title,
                                                  Artist = e.Artist,
@@ -60,7 +63,6 @@ namespace SampleStore.Controllers
                                                  SampleMp3Blob = e.SampleBlobURL,
                                                  SampleMp3URL = e.SampleMp3URL,
                                                  SampleDate = e.SampleDate
-
 
                                              };
             return sampleList;
@@ -75,17 +77,18 @@ namespace SampleStore.Controllers
         [ResponseType(typeof(Sample))]
         public IHttpActionResult GetSample(string id)
         {
-            // Create a retrieve operation that takes a sample entity.
+            // Create a retrieve operation that takes a sample entity, and takes the partitionName and Id.
             TableOperation getOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
 
             // Execute the retrieve operation.
             TableResult getOperationResult = table.Execute(getOperation);
 
-            // Construct response including a new DTO as appropriate
+            // Construct a response including a new DTO as appropriate
             if (getOperationResult.Result == null) return NotFound();
             else
             {
                 SampleEntity sampleEntity = (SampleEntity)getOperationResult.Result;
+                // Create a new sample
                 Sample p = new Sample()
                 {
                     SampleID = sampleEntity.RowKey,
@@ -94,15 +97,12 @@ namespace SampleStore.Controllers
                     Mp3Blob = sampleEntity.Mp3Blob,
                     SampleMp3Blob = sampleEntity.SampleMp3Blob,
                     SampleDate = sampleEntity.SampleDate,
-                    SampleMp3URL = sampleEntity.SampleMp3URL
-
-                    
+                    SampleMp3URL = sampleEntity.SampleMp3URL                    
                 };
+
                 return Ok(p);
             }
         }
-
-
 
         // POST: api/Samples
         /// <summary>
@@ -114,6 +114,7 @@ namespace SampleStore.Controllers
         [ResponseType(typeof(Sample))]
         public IHttpActionResult PostSample(Sample sample)
         {
+            // create a new sample entity
             SampleEntity sampleEntity = new SampleEntity()
             {
                 RowKey = getNewMaxRowKeyValue(),
@@ -148,6 +149,7 @@ namespace SampleStore.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutSample(string id, Sample sample)
         {
+            // if the id is not equal to the sampleId, return a BadRequest
             if (id != sample.SampleID)
             {
                 return BadRequest();
@@ -162,10 +164,10 @@ namespace SampleStore.Controllers
             // Assign the result to a SampleEntity object.
             SampleEntity updateEntity = (SampleEntity)retrievedResult.Result;
 
-            // get rid of ANY OLD BLOBs
+            // Delete any old blob
             deleteOldBlobs(updateEntity);
 
-            // Updating the OLD ENTITY
+            // Update the old entity properties
             updateEntity.Title = sample.Title;
             updateEntity.Artist = sample.Artist;
             updateEntity.CreatedDate = sample.CreatedDate;
@@ -176,26 +178,28 @@ namespace SampleStore.Controllers
 
 
             // Create the TableOperation that inserts the sample entity.
-            // Note semantics of InsertOrReplace() which are consistent with PUT
+            // The InsertOrReplace() is consistent with PUT
             var updateOperation = TableOperation.InsertOrReplace(updateEntity);
 
             // Execute the insert operation.
             table.Execute(updateOperation);
 
+            // return the status code
             return StatusCode(HttpStatusCode.NoContent);
         }
 
 
-        // DELETE OLD BLOBS
+        // Delete any old blobs
         /// <summary>
-        /// DELETE OLD BLOB
+        /// Delete any old blob
         /// </summary>
         /// <param name="updateEntity"></param>
         private void deleteOldBlobs(SampleEntity updateEntity)
         {
+            // if the Mp3Blob entity is not equal to null, get its reference and update the entity
             if (updateEntity.Mp3Blob != null)
             {
-                
+                // Declare an Mp3Blob and assign it to a reference from the sample container
                 var Mp3blob = getSampleContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
                 Mp3blob.DeleteIfExists();
                 updateEntity.Mp3Blob = null;
@@ -203,6 +207,7 @@ namespace SampleStore.Controllers
                 updateEntity.SampleDate = null;
                 updateEntity.SampleMp3Blob = null;
 
+                // If the SampleMp3Blob entity is not equal to nulll, get the reference - delete if it exists
                 if (updateEntity.SampleMp3Blob != null)
                 {
                     var SampleMp3Blob = getSampleContainer().GetBlockBlobReference(updateEntity.SampleMp3Blob);
@@ -227,40 +232,41 @@ namespace SampleStore.Controllers
 
             // Execute the retrieve operation.
             TableResult retrievedResult = table.Execute(retrieveOperation);
-            // check if the TARGET ENTITY EXIST 
+            // Check if the target is null or does exist  
             if (retrievedResult.Result == null) return NotFound();
             else
             {
-                // ASSIGN RETRIEVED RESULT to a SAMPLE ENTITY
+                // Assign the retrieved result to a SampleEntity object 
                 SampleEntity deleteEntity = (SampleEntity)retrievedResult.Result;
                 
-                // DELETE OPERATION 
+                // Delete a table operation  
                 TableOperation deleteOperation = TableOperation.Delete(deleteEntity);
 
-                // DELETE OLD BLOBs ASSOCIATED TO THE TARGET ENTITY
+                // Get rid of any old blobs associated to the target entity - pass the entity as a parameter
                 deleteOldBlobs(deleteEntity);
 
-                // Execute the operation.
-                table.Execute(deleteOperation);
+                // Execute the delete operation.
+                table.Execute(deleteOperation);              
 
-              
-
+                // return ok - result
                 return Ok(retrievedResult.Result);
             }
         }
 
 
-        
+        // Method getnewMaxRowKeyValue() generates the rowkey automatically
         private String getNewMaxRowKeyValue()
         {
             TableQuery<SampleEntity> query = new TableQuery<SampleEntity>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionName));
 
             int maxRowKeyValue = 0;
+            // Loop through the records to get the maximum RowKey value
             foreach (SampleEntity entity in table.ExecuteQuery(query))
             {
                 int entityRowKeyValue = Int32.Parse(entity.RowKey);
                 if (entityRowKeyValue > maxRowKeyValue) maxRowKeyValue = entityRowKeyValue;
             }
+            // increment the rowkey that will be used when creating a new record
             maxRowKeyValue++;
             return maxRowKeyValue.ToString();
         }

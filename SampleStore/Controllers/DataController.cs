@@ -98,18 +98,18 @@ namespace SampleStore.Controllers
             string mp3BlobName = string.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 
             //Create the path for the new blob
-            string path = "audio/" + mp3BlobName;
+            //string path = "audio/" + mp3BlobName;
 
 
             //Uploading the blob content from the Http stream
-            var blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference(path);
+            //var blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference(path);
             var request = HttpContext.Current.Request;
-            //var mp3Blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + mp3BlobName);
-            blob.Properties.ContentType = "audio/mpeg3";
+            var mp3Blob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + mp3BlobName);
+            mp3Blob.Properties.ContentType = "audio/mpeg3";
 
             // save the uploaded blob
-            blob.UploadFromStream(request.InputStream);
-            blob.SetMetadata();
+            mp3Blob.UploadFromStream(request.InputStream);
+            mp3Blob.SetMetadata();
 
             //update the relevant entity with the new blob name
             updateEntity.Mp3Blob = mp3BlobName;
@@ -145,8 +145,8 @@ namespace SampleStore.Controllers
         {
 
             var updateOperation = TableOperation.InsertOrReplace(updateEntity);
-            //TableOperation insertOperation = TableOperation.InsertOrReplace(updateEntity);
 
+            // Check if the target entity has an Mp3Blob, SampleMp3Blob, and SampleDate
             if (updateEntity.Mp3Blob != null || updateEntity.SampleMp3Blob != null || updateEntity.SampleDate != null)
             {
                 //var blob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + updateEntity.Mp3Blob);
