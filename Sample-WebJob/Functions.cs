@@ -16,7 +16,7 @@ using System.Configuration;
 
 namespace Sample_WebJob
 {
-    public class Functions
+    public static class Functions
     {
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
@@ -49,16 +49,16 @@ namespace Sample_WebJob
             sampleInTable = (SampleEntity)getOperationResult.Result;
 
             // GETTING THE BLOB STORAGE using the RowKey
-            BlobStorageService blobService = new BlobStorageService();
+            //BlobStorageService blobService = new BlobStorageService();
 
             // use log.WriteLine 
             //logger.WriteLine("Mp3Blob " + sampleInTable.Mp3Blob);
             //logger.WriteLine("GeneratedAudioSample started...");
-            var inputBlob = blobService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + sampleInTable.Mp3Blob);
+            var inputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + sampleInTable.Mp3Blob);
 
             String sampleBlobName = String.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 
-            var outputBlob = blobService.getCloudBlobContainer().GetBlockBlobReference("audio/" + sampleBlobName);
+            var outputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("audio/" + sampleBlobName);
 
             // Open streams to blobs for reading and writing as appropriate.
             // Pass references to application specific methods

@@ -7,7 +7,7 @@ namespace SampleStore
 {
     public class BlobStorageService
     {
-        public CloudBlobContainer getCloudBlobContainer()
+        public static CloudBlobContainer getCloudBlobContainer()
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse
                 (ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());

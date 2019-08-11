@@ -33,7 +33,7 @@ namespace SampleStore.Controllers
 
         private CloudBlobContainer getSampleContainer()
         {
-            return blobStorageService.getCloudBlobContainer();
+            return BlobStorageService.getCloudBlobContainer();
         }
 
 
