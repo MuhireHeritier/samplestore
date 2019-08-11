@@ -42,7 +42,7 @@ namespace Sample_WebJob
             // use log.WriteLine             
             //logger.WriteLine("Mp3Blob " + sampleInTable.Mp3Blob);
             //logger.WriteLine("GeneratedAudioSample started...");
-            var inputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + sampleInTable.Mp3Blob);
+            var inputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originaludio/" + sampleInTable.Mp3Blob);
 
             String sampleBlobName = String.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 
