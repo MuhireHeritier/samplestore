@@ -149,11 +149,6 @@ namespace SampleStore.Controllers
         [ResponseType(typeof(void))]
         public IHttpActionResult PutSample(string id, Sample sample)
         {
-            // if the id is not equal to the sampleId, return a BadRequest
-            if (id != sample.SampleID)
-            {
-                return BadRequest();
-            }
 
             // Create a retrieve operation that takes a sample entity.
             TableOperation retrieveOperation = TableOperation.Retrieve<SampleEntity>(partitionName, id);
@@ -163,6 +158,12 @@ namespace SampleStore.Controllers
 
             // Assign the result to a SampleEntity object.
             SampleEntity updateEntity = (SampleEntity)retrievedResult.Result;
+
+            // if the id is not equal to the sampleId, return a BadRequest
+            //if (id != updateEntity.RowKey)
+            //{
+            //    return BadRequest();
+            //}
 
             // Delete any old blob
             deleteOldBlobs(updateEntity);
@@ -185,7 +186,7 @@ namespace SampleStore.Controllers
             table.Execute(updateOperation);
 
             // return the status code
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok(updateEntity);
         }
 
 

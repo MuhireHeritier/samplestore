@@ -29,7 +29,6 @@ namespace Sample_WebJob
         {
             // GETTING THE BLOB STORAGE using the RowKey
             CloudStorageAccount storageAccount;
-            CloudTableClient tableClient;
             storageAccount = CloudStorageAccount.Parse(ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ToString());
 
             // Create a retrieve operation that takes a sample entity
@@ -42,7 +41,7 @@ namespace Sample_WebJob
             // use log.WriteLine             
             //logger.WriteLine("Mp3Blob " + sampleInTable.Mp3Blob);
             //logger.WriteLine("GeneratedAudioSample started...");
-            var inputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originaludio/" + sampleInTable.Mp3Blob);
+            var inputBlob = BlobStorageService.getCloudBlobContainer().GetBlockBlobReference("originalAudio/" + sampleInTable.Mp3Blob);
 
             String sampleBlobName = String.Format("{0}{1}", Guid.NewGuid(), ".mp3");
 

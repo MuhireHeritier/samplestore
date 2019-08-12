@@ -4,9 +4,10 @@ using System;
 
 namespace SampleStore.Models
 {
-
+    // class SampleEntity extends TableEntity
     public class SampleEntity : TableEntity
     {
+        // Getters and setters 
         public string Title { get; set; }
         public string Artist { get; set; }
         public DateTime? CreatedDate { get; set; }
@@ -16,7 +17,7 @@ namespace SampleStore.Models
         public DateTime? SampleDate { get; set; }
         public string SampleBlobURL { get; set; }
 
-
+        // Constructor - two parameters partitionKey and sampleID
         public SampleEntity(string partitionKey, string sampleID)
         {
             PartitionKey = partitionKey;

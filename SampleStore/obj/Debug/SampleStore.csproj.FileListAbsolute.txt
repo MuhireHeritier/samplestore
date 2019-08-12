@@ -100,4 +100,3 @@ C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\b
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\bin\zh-Hant\System.Spatial.resources.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.dll
 C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.pdb
-C:\Users\hmuhire\Documents\Visual Studio 2015\Projects\SampleStore\SampleStore\obj\Debug\SampleStore.csprojResolveAssemblyReference.cache
